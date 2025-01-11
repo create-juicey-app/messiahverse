@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 export default function DesktopNav({ navRef, navPosition }) {
   return (
     <motion.aside 
-      className="w-64 shrink-0 hidden lg:block"
+      className="w-64 shrink-0 hidden lg:block relative"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >

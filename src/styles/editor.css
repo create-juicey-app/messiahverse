@@ -1,0 +1,8 @@
+/* Import markdown editor styles */
+@import '~@uiw/react-markdown-preview/markdown.css';
+@import '~@uiw/react-md-editor/markdown-editor.css';
+
+/* Override any styles as needed */
+.w-md-editor {
+  background-color: transparent;
+}

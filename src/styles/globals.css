@@ -183,3 +183,14 @@ html {
 .bg-surface\/95 {
   background-color: rgba(var(--surface-rgb), 0.95);
 }
+
+/* Text Stroke */
+.mood-text {
+  color: black;
+  text-shadow: 
+    -1px -1px 0 #fff,  
+     1px -1px 0 #fff,
+    -1px  1px 0 #fff,
+     1px  1px 0 #fff;
+  font-weight: 700;
+}

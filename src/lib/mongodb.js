@@ -24,4 +24,9 @@ if (process.env.NODE_ENV === 'development') {
   clientPromise = client.connect()
 }
 
+export async function getDb() {
+  const client = await clientPromise
+  return client.db()
+}
+
 export default clientPromise

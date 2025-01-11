@@ -1,9 +1,9 @@
 import Head from 'next/head'
 import { motion, useScroll, useSpring } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
-import ThemeToggle from './components/ThemeToggle.js'
-import ParallaxHeader from './components/ParallaxHeader.js'
-import Footer from './components/Footer'
+import ThemeToggle from '../components/ThemeToggle.js'
+import ParallaxHeader from '../components/ParallaxHeader.js'
+import Footer from "../components/Footer"
 import DesktopNav from '../components/Navigation/DesktopNav'
 import UserMenu from '../components/Navigation/UserMenu'
 import Link from 'next/link'

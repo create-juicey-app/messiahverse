@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser, faCog, faSignOutAlt, faSpinner, faCircleUser } from '@fortawesome/free-solid-svg-icons'
 
-export default function UserMenu() {
+export default function UserMenu({ currentPost }) {
   const { data: session, status } = useSession()
   const [isOpen, setIsOpen] = useState(false)
 
@@ -24,28 +24,34 @@ export default function UserMenu() {
     hover: { x: 5 }
   }
 
+  const isOwner = currentPost && session?.user?.id === currentPost.authorId
+
   if (status === 'loading') {
     return (
       <motion.div
-        className="fixed top-6 left-6 z-50 p-4 rounded-full bg-surface/95 backdrop-blur-sm"
+      className="fixed top-6 left-6 z-50 p-4 rounded-full bg-surface/95 backdrop-blur-sm"
       >
-        <FontAwesomeIcon icon={faSpinner} className="animate-spin text-primary text-xl" />
+      <img 
+        src="/loading.webp" 
+        alt="Loading..." 
+        className="w-14 h-14 [image-rendering:pixelated]"
+      />
       </motion.div>
     )
   }
-
   if (!session) {
     return (
       <motion.button
-        variants={buttonVariants}
-        whileHover="hover"
-        whileTap="tap"
-        className="fixed top-6 left-6 z-50 p-4 rounded-full bg-surface/95 backdrop-blur-sm 
-                 border-2 border-primary/20 shadow-lg"
+      variants={buttonVariants}
+      whileHover="hover"
+      whileTap="tap"
+      className="fixed top-6 left-6 z-50 h-14 px-8 rounded-full bg-surface/95 backdrop-blur-sm 
+         border-2 border-primary/20 shadow-lg"
       >
-        <Link href="/auth/signin" className="text-primary">
-          <FontAwesomeIcon icon={faUser} className="text-xl" />
-        </Link>
+      <Link href="/auth/signin" className="text-primary flex items-center gap-3">
+      <FontAwesomeIcon icon={faUser} className="text-xl" />
+      <span className="text-base font-medium">Login</span>
+      </Link>
       </motion.button>
     )
   }
@@ -92,13 +98,13 @@ export default function UserMenu() {
               >
                 <FontAwesomeIcon 
                   icon={faCircleUser} 
-                  className="text-2xl text-primary/60 group-hover:text-primary transition-colors duration-200" 
+                  className="text-2xl" 
                 />
                 <div>
-                  <p className="font-medium group-hover:text-primary transition-colors duration-200">
+                  <p className="font-medium">
                     {session.user.name}
                   </p>
-                  <p className="text-sm text-foreground/60">{session.user.email}</p>
+                  <p className="text-sm text-foreground/60">Emails probably??</p>
                 </div>
               </motion.div>
             </Link>

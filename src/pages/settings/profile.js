@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import { motion } from 'framer-motion'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSave } from '@fortawesome/free-solid-svg-icons'
-
+import UserMenu from '../../components/Navigation/UserMenu'
 export default function ProfileSettings() {
   const { data: session } = useSession()
   const router = useRouter()
@@ -40,6 +40,7 @@ export default function ProfileSettings() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <UserMenu/>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

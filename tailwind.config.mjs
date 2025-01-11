@@ -51,6 +51,15 @@ export default {
       // Optional: Add matching box shadows
       boxShadow: {
         'soft-purple': '0 4px 14px 0 rgba(147, 51, 234, 0.1)',
+      },
+      keyframes: {
+        slideDown: {
+          '0%': { opacity: 0, transform: 'translateY(-10px)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' }
+        }
+      },
+      animation: {
+        slideDown: 'slideDown 0.2s ease-out',
       }
     },
   },
