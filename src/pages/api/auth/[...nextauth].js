@@ -18,6 +18,15 @@ export const authOptions = {
       }
       return session;
     },
+    redirect: async ({ url, baseUrl }) => {
+      if (url.startsWith(baseUrl)) return url;
+      return baseUrl;
+    },
+  },
+  pages: {
+    signIn: '/auth/signin',
+    signOut: '/auth/signin',
+    error: '/auth/signin',
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',

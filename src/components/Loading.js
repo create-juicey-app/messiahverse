@@ -59,6 +59,7 @@ export default function Loading() {
                         width={200}
                         height={200}
                         alt="Loading"
+                        unoptimized={true}
                         className={`image-rendering-pixelated ${isLightTheme ? 'invert' : ''}`}
                         onLoad={() => setImageLoaded(true)}
                         priority

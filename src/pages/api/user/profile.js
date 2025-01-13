@@ -38,7 +38,10 @@ export default async function handler(req, res) {
           $set: {
             name: req.body.name,
             bio: req.body.bio,
-            preferences: req.body.preferences,
+            preferences: {
+              notifications: true,
+              darkMode: req.body.preferences.darkMode
+            },
             updatedAt: new Date()
           }
         }
