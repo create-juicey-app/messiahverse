@@ -1,21 +1,61 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { motion } from 'framer-motion'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSave } from '@fortawesome/free-solid-svg-icons'
 import UserMenu from '../../components/Navigation/UserMenu'
+import { useTheme } from '../../contexts/ThemeContext'
+
 export default function ProfileSettings() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
+  const { setDarkMode } = useTheme()
+  const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState({
-    name: session?.user?.name || '',
+    name: '',
     bio: '',
     preferences: {
       theme: 'system',
-      notifications: true
+      notifications: true,
+      darkMode: false
     }
   })
+
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.id) {
+      fetch(`/api/user/${session.user.id}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to fetch')
+          return res.json()
+        })
+        .then(data => {
+          setProfile({
+            name: data.name || session.user.name,
+            bio: data.bio || '',
+            preferences: {
+              theme: data.preferences?.theme || 'system',
+              notifications: data.preferences?.notifications ?? true,
+              darkMode: data.preferences?.darkMode ?? false
+            }
+          })
+          setLoading(false)
+        })
+        .catch(error => {
+          console.error('Error loading profile:', error)
+          setLoading(false)
+        })
+    } else if (status === "unauthenticated") {
+      router.push('/auth/signin')
+    }
+  }, [session, status, router])
+
+  useEffect(() => {
+    if (!loading) {
+      const isDark = profile.preferences.darkMode
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
+    }
+  }, [profile.preferences.darkMode, loading])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -27,15 +67,33 @@ export default function ProfileSettings() {
       })
       
       if (res.ok) {
-        // Redirect to user's profile page
         router.push(`/profile/${session.user.id}`)
       } else {
-        // Handle error
-        console.error('Failed to update profile')
+        const error = await res.json()
+        console.error('Failed to update profile:', error)
       }
     } catch (error) {
       console.error('Error updating profile:', error)
     }
+  }
+
+  const handleThemeChange = (isDark) => {
+    setProfile({
+      ...profile,
+      preferences: { ...profile.preferences, darkMode: isDark }
+    })
+    setDarkMode(isDark)
+  }
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <UserMenu />
+        <div className="max-w-2xl mx-auto text-center">
+          Loading...
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -82,6 +140,34 @@ export default function ProfileSettings() {
               <option value="light">Light</option>
               <option value="dark">Dark</option>
             </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium mb-2">Theme Mode</label>
+            <div className="flex space-x-4">
+              <button
+                type="button"
+                onClick={() => handleThemeChange(false)}
+                className={`px-4 py-2 rounded-lg border ${
+                  !profile.preferences.darkMode 
+                    ? 'bg-primary text-white'
+                    : 'bg-surface border-border'
+                }`}
+              >
+                Light
+              </button>
+              <button
+                type="button"
+                onClick={() => handleThemeChange(true)}
+                className={`px-4 py-2 rounded-lg border ${
+                  profile.preferences.darkMode 
+                    ? 'bg-primary text-white'
+                    : 'bg-surface border-border'
+                }`}
+              >
+                Dark
+              </button>
+            </div>
           </div>
 
           <motion.button

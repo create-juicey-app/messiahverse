@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { AnimatePresence } from "framer-motion";
 import { SessionProvider } from "next-auth/react"
+import { ThemeProvider } from "../contexts/ThemeContext";
 import PropTypes from 'prop-types';
+import { ImageCacheProvider } from "../contexts/ImageCache";
 
 export default function App({ Component, pageProps: { session, ...pageProps } }) {
   const [isLoading, setIsLoading] = useState(true); // Start with true for initial load
@@ -38,10 +40,14 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
 
   return (
     <SessionProvider session={session}>
-      <AnimatePresence mode="wait" onExitComplete={() => window.scrollTo(0, 0)}>
-        {isLoading && <Loading key="loader" />}
-      </AnimatePresence>
-      <Component {...pageProps} />
+      <ThemeProvider>
+        <ImageCacheProvider>
+          <AnimatePresence mode="wait" onExitComplete={() => window.scrollTo(0, 0)}>
+            {isLoading && <Loading key="loader" />}
+          </AnimatePresence>
+          <Component {...pageProps} />
+        </ImageCacheProvider>
+      </ThemeProvider>
     </SessionProvider>
   );
 }

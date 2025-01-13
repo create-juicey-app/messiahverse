@@ -16,6 +16,7 @@
     --muted: rgba(147, 51, 234, 0.2);
     --border: rgba(147, 51, 234, 0.3);
     --surface-rgb: 45, 45, 45;
+    --surface-dark: 24 24 28; /* Slightly darker than your surface color */
   }
 
   [data-theme='light'] {

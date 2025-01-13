@@ -1,7 +1,6 @@
 import Head from 'next/head'
 import { motion, useScroll, useSpring } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
-import ThemeToggle from '../components/ThemeToggle.js'
 import ParallaxHeader from '../components/ParallaxHeader.js'
 import Footer from "../components/Footer"
 import DesktopNav from '../components/Navigation/DesktopNav'
@@ -82,7 +81,6 @@ export default function Home() {
           <meta name="description" content="Explore the multiverse of Niko variants" />
         </Head>
 
-        <ThemeToggle />
         <UserMenu />
         <ParallaxHeader />
 

@@ -2,16 +2,46 @@
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@uiw/react-md-editor', '@uiw/react-markdown-preview'],
+  
   experimental: {
+    optimizeCss: true,
     turbo: {
-      rules: {
-        '*.md': ['markdownLoader'],
-      },
       resolveAlias: {
         '@': './src',
       },
     },
   },
+
+  // Image optimization through Vercel
+  images: {
+    domains: [], // Add your image domains
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60,
+  },
+
+  // Headers for Vercel + Cloudflare
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: process.env.NODE_ENV === 'production' 
+              ? 'public, max-age=31536000, stale-while-revalidate'
+              : 'no-cache, no-store, must-revalidate'
+          },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
+        ],
+      },
+    ]
+  },
+
+  // Disable powered by header
+  poweredByHeader: false,
+
   webpack: (config, { dev, isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -49,9 +79,6 @@ const nextConfig = {
     
     return config;
   },
-  images: {
-    disableStaticImages: true
-  }
 }
 
 module.exports = nextConfig

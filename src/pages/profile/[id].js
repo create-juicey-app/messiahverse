@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import { useSession } from 'next-auth/react'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-
+import UserMenu from '@/components/Navigation/UserMenu'
 export default function Profile() {
   const router = useRouter()
   const { id } = router.query
@@ -19,10 +19,12 @@ export default function Profile() {
   }, [id])
 
   if (!profile) {
-    return <div>Loading...</div>
+    return <><UserMenu></UserMenu><div>Loading...</div></>
   }
 
   return (
+    <>
+    <UserMenu></UserMenu>
     <div className="container mx-auto px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -60,5 +62,6 @@ export default function Profile() {
         )}
       </motion.div>
     </div>
+    </>
   )
 }
