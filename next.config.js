@@ -2,16 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@uiw/react-md-editor', '@uiw/react-markdown-preview'],
-  experimental: {
-    turbo: {
-      rules: {
-        '*.md': ['markdownLoader'],
-      },
-      resolveAlias: {
-        '@': './src',
-      },
-    },
-  },
   webpack: (config, { dev, isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -43,7 +33,7 @@ const nextConfig = {
       include: [
         /[\\/]node_modules[\\/]@uiw[\\/]react-md-editor[\\/]/,
         /[\\/]node_modules[\\/]@uiw[\\/]react-markdown-preview[\\/]/,
-        /[\\/]src[\\/]styles[\\/]/
+        /[\\/]src[\\/]styles[\\/]/,
       ],
     });
     
@@ -51,7 +41,7 @@ const nextConfig = {
   },
   images: {
     disableStaticImages: true
-  }
+  },
 }
 
 module.exports = nextConfig

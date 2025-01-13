@@ -1,28 +1,36 @@
-import "@/styles/globals.css";
 import Loading from "../components/Loading";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { AnimatePresence } from "framer-motion";
 import { SessionProvider } from "next-auth/react"
-import PropTypes from 'prop-types';
+import dynamic from 'next/dynamic';
 
-export default function App({ Component, pageProps: { session, ...pageProps } }) {
-  const [isLoading, setIsLoading] = useState(true); // Start with true for initial load
+// SafeHydrate component to prevent hydration issues
+function SafeHydrate({ children }) {
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  return mounted ? <div suppressHydrationWarning>{children}</div> : null
+}
+
+const AppContent = dynamic(() => Promise.resolve(({ Component, pageProps }) => {
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // Handle initial page load
-    setIsLoading(false);
+    if (!router) return;
 
     const handleStart = (url) => {
-      // Only show loading if changing to a different route
       if (url !== router.asPath) {
         setIsLoading(true);
       }
     };
 
     const handleComplete = () => {
-      setTimeout(() => setIsLoading(false), 500); // Add small delay for smoother transition
+      setTimeout(() => setIsLoading(false), 500);
     };
 
     router.events.on("routeChangeStart", handleStart);
@@ -34,14 +42,24 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
       router.events.off("routeChangeComplete", handleComplete);
       router.events.off("routeChangeError", handleComplete);
     };
-  }, []); // Close useEffect
+  }, [router]);
 
   return (
-    <SessionProvider session={session}>
+    <>
       <AnimatePresence mode="wait" onExitComplete={() => window.scrollTo(0, 0)}>
         {isLoading && <Loading key="loader" />}
       </AnimatePresence>
       <Component {...pageProps} />
+    </>
+  );
+}), { ssr: false });
+
+export default function App({ Component, pageProps: { session, ...pageProps } }) {
+  return (
+    <SessionProvider session={session}>
+      <SafeHydrate>
+        <AppContent Component={Component} pageProps={pageProps} />
+      </SafeHydrate>
     </SessionProvider>
   );
 }

@@ -1,33 +1,40 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import dynamic from 'next/dynamic';
 
-export default function EditMood() {
-  const router = useRouter();
-  const { data: session, status } = useSession();
+const NoSSR = dynamic(() => Promise.resolve(({ children }) => <>{children}</>), {
+  ssr: false
+});
+
+// Dynamically import the page component with no SSR
+const EditMoodPage = dynamic(() => Promise.resolve(({ session }) => {
   const [moodData, setMoodData] = useState({
     gridPosition: 0,
     mentalWellness: 50,
     tiredness: 50
   });
+  const router = useRouter();
 
   useEffect(() => {
-    if (status === 'loading') return;
-    
     const checkAuth = async () => {
-      const res = await fetch('/api/mood/auth', { credentials: 'include' });
-      const data = await res.json();
-      if (!data.canEdit) {
-        router.push('/juicey');
-      } else {
-        const moodRes = await fetch('/api/mood');
-        const moodData = await moodRes.json();
-        setMoodData(moodData);
+      try {
+        const res = await fetch('/api/mood/auth', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.canEdit && router) {
+          router.push('/juicey');
+        } else {
+          const moodRes = await fetch('/api/mood');
+          const moodData = await moodRes.json();
+          setMoodData(moodData);
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
       }
     };
 
     checkAuth();
-  }, [session, status, router]);
+  }, [router]);
 
   const getCellBackground = (index) => {
     const row = Math.floor(index / 6);
@@ -61,19 +68,21 @@ export default function EditMood() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch('/api/mood', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(moodData),
-    });
+    try {
+      const res = await fetch('/api/mood', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(moodData),
+      });
 
-    if (res.ok) {
-      router.push('/juicey');
+      if (res.ok && router) {
+        router.push('/juicey');
+      }
+    } catch (error) {
+      console.error('Submit failed:', error);
     }
   };
-
-  if (status === 'loading') return <div>Loading...</div>;
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 dark:bg-gray-900 dark:text-white">
@@ -152,5 +161,16 @@ export default function EditMood() {
         </button>
       </form>
     </div>
+  );
+}), {
+  ssr: false,
+  loading: () => <div>Loading...</div>
+});
+
+export default function EditMood() {
+  return (
+    <NoSSR>
+      <EditMoodPage />
+    </NoSSR>
   );
 }

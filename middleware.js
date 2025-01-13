@@ -20,6 +20,6 @@ export const config = {
     '/content/nikosona/:path*',
     '/upload/:path*', 
     '/juicey/edit',
-    '/api/((?!auth|mood|weather).*)' // Protect API routes except auth/mood/weather
+    '/api/((?!auth|mood|weather).*)'
   ]
 }

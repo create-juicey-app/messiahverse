@@ -9,6 +9,13 @@ export default async function handler(req, res) {
     const client = await clientPromise;
     const db = client.db('messiahverse');
 
+    // Log IP address
+    const ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    await db.collection('storedips').insertOne({
+      ip,
+      timestamp: new Date()
+    });
+
     // Get last 24 hours of mood history
     const history = await db.collection('mood_history')
       .find({
