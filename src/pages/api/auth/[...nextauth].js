@@ -1,6 +1,6 @@
 import NextAuth from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
-import { MongoDBAdapter } from '@next-auth/mongodb-adapter'
+import { MongoDBAdapter } from "@next-auth/mongodb-adapter"
 import clientPromise from '../../../lib/mongodb'
 
 export const authOptions = {
@@ -12,22 +12,24 @@ export const authOptions = {
   ],
   adapter: MongoDBAdapter(clientPromise),
   callbacks: {
-    async session({ session, user }) {
-      // Add user ID to session
-      session.user.id = user.id
-      return session
-    },
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id
+    session: async ({ session, user }) => {
+      if (session?.user) {
+        session.user.id = user.id;
       }
-      return token
-    }
+      return session;
+    },
+    redirect: async ({ url, baseUrl }) => {
+      if (url.startsWith(baseUrl)) return url;
+      return baseUrl;
+    },
   },
-  session: {
-    strategy: 'database',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+  pages: {
+    signIn: '/auth/signin',
+    signOut: '/auth/signin',
+    error: '/auth/signin',
   },
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
 }
 
 export default NextAuth(authOptions)
