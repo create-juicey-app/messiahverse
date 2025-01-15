@@ -10,7 +10,7 @@ import {
   faPenFancy,
   faEye,
   faDroplet,
-  faSkull
+  faTriangleExclamation, // Add this instead of faSkull
 } from '@fortawesome/free-solid-svg-icons'
 import UserMenu from '../../components/Navigation/UserMenu'
 import { useTheme } from '../../contexts/ThemeContext'
@@ -67,8 +67,8 @@ export default function ProfileSettings() {
       message: "You are about to permanently delete your account. Please understand that:",
       details: [
         "This action is immediate and cannot be undone",
-        "All your data will be permanently erased",
-        "You'll lose access to all our services",
+        "All your data will be permanently erased, including your pages",
+        "You'll lose access to all saved settings and preferences",
         "You'll need to create a new account to use our services again"
       ],
       buttonText: "Confirm Deletion"
@@ -362,7 +362,7 @@ export default function ProfileSettings() {
             >
               <div className="p-8 space-y-6">
                 <h2 className="text-2xl font-bold text-destructive flex items-center gap-2">
-                  <FontAwesomeIcon icon={faSkull} className="w-6 h-6" />
+                  <FontAwesomeIcon icon={faTriangleExclamation} className="w-6 h-6" />
                   {deleteConfirmationSteps[deleteStep].title}
                 </h2>
                 <div className="space-y-6">
@@ -452,7 +452,7 @@ export default function ProfileSettings() {
                           transition={{ duration: 0.2 }}
                           className="flex items-center justify-center gap-2"
                         >
-                          {canProceed && <FontAwesomeIcon icon={faSkull} className="w-4 h-4" />}
+                          {canProceed && <FontAwesomeIcon icon={faTriangleExclamation} className="w-4 h-4" />}
                           {canProceed ? deleteConfirmationSteps[deleteStep].buttonText : ""}
                         </motion.span>
                       )}
@@ -688,7 +688,7 @@ export default function ProfileSettings() {
             >
               <div className="flex flex-col space-y-1.5 p-6">
                 <h3 className="text-lg font-semibold leading-none tracking-tight text-destructive flex items-center gap-2">
-                  <FontAwesomeIcon icon={faSkull} className="w-4 h-4" />
+                  <FontAwesomeIcon icon={faTriangleExclamation} className="w-4 h-4" />
                   Danger Zone
                 </h3>
                 <p className="text-sm text-muted-foreground">
@@ -701,7 +701,7 @@ export default function ProfileSettings() {
                   onClick={() => setShowDeleteModal(true)}
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:border-destructive/90 h-10 px-4 py-2 w-full"
                 >
-                  <FontAwesomeIcon icon={faSkull} className="w-4 h-4 mr-2" />
+                  <FontAwesomeIcon icon={faTriangleExclamation} className="w-4 h-4 mr-2" />
                   Delete Account
                 </button>
               </div>
