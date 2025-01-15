@@ -14,7 +14,7 @@ const nextConfig = {
 
   // Image optimization through Vercel
   images: {
-    domains: [], // Add your image domains
+    domains: ['avatars.githubusercontent.com'], // Added GitHub avatars domain
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60,
   },

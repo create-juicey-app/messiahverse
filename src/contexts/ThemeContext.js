@@ -5,29 +5,32 @@ const ThemeContext = createContext()
 
 export function ThemeProvider({ children }) {
   const { data: session, status } = useSession()
-  const [darkMode, setDarkMode] = useState(false)
+  const [darkMode, setDarkMode] = useState(true)
 
   useEffect(() => {
+    // Set dark mode by default
+    document.documentElement.setAttribute('data-theme', 'dark')
+    
+    // Check for stored preference, but default to dark
+    const stored = localStorage.getItem('darkMode')
+    const initialDarkMode = stored === null ? true : stored === 'true'
+    setDarkMode(initialDarkMode)
+    document.documentElement.setAttribute('data-theme', initialDarkMode ? 'dark' : 'light')
+
     if (status === "authenticated" && session?.user?.id) {
-      // Fetch user preferences
       fetch(`/api/user/${session.user.id}`)
         .then(res => res.json())
         .then(data => {
-          const isDark = data.preferences?.darkMode ?? false
+          const isDark = data.preferences?.darkMode ?? true // Default to dark
           setDarkMode(isDark)
           document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
+          localStorage.setItem('darkMode', isDark)
         })
         .catch(() => {
-          // Fallback to system preference
-          const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-          setDarkMode(systemDark)
-          document.documentElement.setAttribute('data-theme', systemDark ? 'dark' : 'light')
+          setDarkMode(true)
+          document.documentElement.setAttribute('data-theme', 'dark')
+          localStorage.setItem('darkMode', 'true')
         })
-    } else {
-      // Use system preference for non-authenticated users
-      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      setDarkMode(systemDark)
-      document.documentElement.setAttribute('data-theme', systemDark ? 'dark' : 'light')
     }
   }, [session, status])
 

@@ -3,7 +3,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { AnimatePresence } from "framer-motion";
 import { SessionProvider } from "next-auth/react"
+import { ImageCacheProvider } from "@/contexts/ImageCache";
 import dynamic from 'next/dynamic';
+import '../styles/globals.css';
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 // SafeHydrate component to prevent hydration issues
 function SafeHydrate({ children }) {
@@ -57,9 +60,13 @@ const AppContent = dynamic(() => Promise.resolve(({ Component, pageProps }) => {
 export default function App({ Component, pageProps: { session, ...pageProps } }) {
   return (
     <SessionProvider session={session}>
-      <SafeHydrate>
-        <AppContent Component={Component} pageProps={pageProps} />
-      </SafeHydrate>
+      <ThemeProvider>
+      <ImageCacheProvider>
+        <SafeHydrate>
+          <AppContent Component={Component} pageProps={pageProps} />
+        </SafeHydrate>
+      </ImageCacheProvider>
+      </ThemeProvider>
     </SessionProvider>
   );
 }

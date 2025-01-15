@@ -1,0 +1,276 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root,
+  [data-theme='dark'] {
+    --background: #1a1a1a;
+    --foreground: #ffffff;
+    --grid-bg: #2d2d2d;
+    --grid-line: #9333ea;
+    --surface: #2d2d2d;
+    --grid-color: 255, 255, 255;
+    --primary: #9333ea;
+    --primary-rgb: 147, 51, 234;
+    --muted: rgba(147, 51, 234, 0.2);
+    --border: rgba(147, 51, 234, 0.3);
+    --surface-rgb: 45, 45, 45;
+    --surface-dark: 24 24 28; /* Slightly darker than your surface color */
+    --primary-transparent: rgba(var(--primary-rgb), 0.1);
+    --warning-transparent: rgba(255, 188, 52, 0.1);
+    --input-bg: #2d2d2d;
+    --input-text: #ffffff;
+    --input-border: rgba(147, 51, 234, 0.3);
+  }
+
+  [data-theme='light'] {
+    --background: #ffffff;
+    --foreground: #1a1a1a;
+    --grid-bg: #e5e5f7;
+    --grid-line: #a855f7;
+    --surface: #ffffff;
+    --primary: #a855f7;
+    --primary-rgb: 168, 85, 247;
+    --muted: rgba(168, 85, 247, 0.1);
+    --border: rgba(168, 85, 247, 0.2);
+    --surface-rgb: 255, 255, 255;
+    --grid-color: 0, 0, 0;
+    --primary-transparent: rgba(var(--primary-rgb), 0.1);
+    --warning-transparent: rgba(255, 188, 52, 0.1);
+    --input-bg: #ffffff;
+    --input-text: #1a1a1a;
+    --input-border: rgba(168, 85, 247, 0.2);
+  }
+
+  /* Add theme transition */
+  *, *::before, *::after {
+    transition: background-color 0.3s ease-in-out,
+                border-color 0.3s ease-in-out,
+                color 0.2s ease-in-out,
+                box-shadow 0.2s ease-in-out;
+  }
+
+  /* Add input styling */
+  input, textarea, select {
+    color: var(--input-text);
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: var(--input-text);
+    opacity: 0.5;
+  }
+}
+
+[data-theme='light'] img.invert {
+  filter: invert(1);
+}
+
+.grid-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  background-size: 50px 50px;
+  background-image:
+    linear-gradient(to right, rgba(var(--grid-color), 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(var(--grid-color), 0.1) 1px, transparent 1px);
+}
+
+.parallax-container {
+  position: relative;
+  height: 85vh;
+  overflow: hidden;
+  width: 100%;
+  margin-bottom: 0;
+  margin-top: 0;
+  perspective: 1000px;
+  mask-image: linear-gradient(to bottom, black calc(100% - 2rem), transparent 100%);
+}
+
+.parallax-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-size: 100% auto; /* Changed from contain to 100% auto */
+  min-height: 100%;
+  will-change: transform;
+  pointer-events: none;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.image-rendering-pixelated {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Animation Keyframes */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Enhanced UI Elements */
+.shadow-soft-glow {
+  box-shadow: 0 0 15px -3px rgba(var(--primary-rgb), 0.1),
+              0 0 30px -5px rgba(var(--primary-rgb), 0.1);
+}
+
+.hover-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px -10px rgba(var(--primary-rgb), 0.3);
+}
+
+/* Animated Background */
+.animated-gradient {
+  background: linear-gradient(
+    45deg,
+    rgba(var(--primary-rgb), 0.1),
+    transparent,
+    rgba(var(--primary-rgb), 0.1)
+  );
+  background-size: 200% 200%;
+  animation: gradientBG 15s ease infinite;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Loading States */
+.loading-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--primary-rgb), 0.1),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Fix progress bar visibility */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary);
+  transform-origin: 0%;
+  z-index: 1000;
+}
+
+/* Ensure content visibility */
+.bg-surface\/95 {
+  background-color: rgba(var(--surface-rgb), 0.95);
+}
+
+/* Text Stroke */
+.mood-text {
+  color: black;
+  text-shadow: 
+    -1px -1px 0 #fff,  
+     1px -1px 0 #fff,
+    -1px  1px 0 #fff,
+     1px  1px 0 #fff;
+  font-weight: 700;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.bottom-nav-item {
+  @apply flex-1 flex flex-col items-center justify-center py-2 text-foreground-60
+         transition-all duration-200;
+}
+
+.bottom-nav-item.active {
+  @apply text-primary;
+}
+
+.bottom-nav-item:active {
+  @apply scale-95;
+}
+
+@layer utilities {
+  .text-foreground-60 {
+    color: rgba(var(--foreground), 0.6);
+  }
+}
+
+/* Add these at the end of your file */
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none;
+  }
+  
+  .mobile-only {
+    display: block;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-hidden {
+    display: block;
+  }
+  
+  .mobile-only {
+    display: none;
+  }
+}
