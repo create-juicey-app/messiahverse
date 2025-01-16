@@ -1,10 +1,15 @@
 import NextAuth from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
+import GoogleProvider from 'next-auth/providers/google'
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter"
 import clientPromise from '../../../lib/mongodb'
 
 export const authOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_ID,
+      clientSecret: process.env.GOOGLE_SECRET,
+    }),
     GithubProvider({
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
@@ -54,6 +59,14 @@ export const authOptions = {
       }
       return session
     },
+    async signOut({ token }) {
+      // Custom signOut callback to handle JWEInvalid error
+      try {
+        // Perform any necessary cleanup or logging here
+      } catch (error) {
+        console.error('Error during signOut:', error)
+      }
+    }
   },
   pages: {
     signIn: '/auth/signin',

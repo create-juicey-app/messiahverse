@@ -160,6 +160,20 @@ export default function SignIn() {
                 variants={itemVariants}
                 whileHover={{ scale: 1.02, backgroundColor: "var(--primary)" }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => signIn('google', { callbackUrl: '/' })}
+                className="w-full flex items-center justify-center gap-3 px-6 py-4
+                         bg-surface/80 border-2 border-primary/20 rounded-xl
+                         text-foreground hover:text-white transition-all duration-300
+                         group shadow-lg hover:shadow-primary/20"
+              >
+                <FontAwesomeIcon icon={faGoogle} className="text-2xl" />
+                <span className="font-medium">Continue with Google</span>
+              </motion.button>
+
+              <motion.button
+                variants={itemVariants}
+                whileHover={{ scale: 1.02, backgroundColor: "var(--primary)" }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => signIn('github', { callbackUrl: '/' })}
                 className="w-full flex items-center justify-center gap-3 px-6 py-4
                          bg-surface/80 border-2 border-primary/20 rounded-xl
@@ -172,7 +186,7 @@ export default function SignIn() {
 
               {/* Disabled buttons with warning pattern */}
               <div className="grid grid-cols-2 gap-4">
-                {['Discord', 'Google'].map((provider, i) => (
+                {['Discord'].map((provider, i) => (
                   <motion.button
                     key={provider}
                     variants={itemVariants}
@@ -186,7 +200,7 @@ export default function SignIn() {
                   >
                     <div className="relative z-10 flex items-center gap-2">
                       <FontAwesomeIcon 
-                        icon={i === 0 ? faDiscord : faGoogle} 
+                        icon={faDiscord} 
                         className="text-xl opacity-50"
                       />
                       <span className="opacity-50">{provider}</span>
