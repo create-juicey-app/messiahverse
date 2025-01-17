@@ -14,7 +14,8 @@ export default function SignIn() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
+        staggerChildren: 0.05,
+        delayChildren: 0.1
       }
     }
   };
@@ -26,7 +27,8 @@ export default function SignIn() {
       opacity: 1,
       transition: {
         type: "spring",
-        stiffness: 100
+        stiffness: 300,
+        damping: 20
       }
     }
   };
@@ -56,13 +58,13 @@ export default function SignIn() {
         x: {
           repeat: Infinity,
           repeatType: "mirror",
-          duration: 5 + (i % 3) * 2,
+          duration: 4 + (i % 3) * 1.5,
           ease: "easeInOut"
         },
         y: {
           repeat: Infinity,
           repeatType: "mirror",
-          duration: 6 + (i % 3) * 2,
+          duration: 5 + (i % 3) * 1.5,
           ease: "easeInOut"
         }
       }

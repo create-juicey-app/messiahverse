@@ -220,11 +220,12 @@ export default function UserMenu({ currentPost }) {
         whileTap="tap"
         className="fixed top-6 left-6 z-50 h-14 px-4 rounded-full bg-surface/95 backdrop-blur-sm 
           border-2 border-primary/20 shadow-lg min-w-[120px]"
+        onClick={() => window.location.href = '/auth/signin'}
       >
-        <Link href="/auth/signin" className="text-primary flex items-center gap-3">
+        <div className="text-primary flex items-center gap-3">
           <FontAwesomeIcon icon={faUser} className="text-xl" />
           <span className="text-base font-medium">Login</span>
-        </Link>
+        </div>
       </motion.button>
     )
   }

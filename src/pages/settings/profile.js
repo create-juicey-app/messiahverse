@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSession, signOut } from 'next-auth/react'  // Add signOut to imports
 import { useRouter } from 'next/router'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -27,7 +27,7 @@ export default function ProfileSettings() {
     bio: '',
     preferences: {
       notifications: true,
-      darkMode: false,
+      darkMode: true, // Default to dark mode initially
       showFollowers: true,
       showLocation: true,
       showJoinDate: true,
@@ -41,57 +41,81 @@ export default function ProfileSettings() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [buttonProgress, setButtonProgress] = useState(0)
   const [canProceed, setCanProceed] = useState(false)
+  const [showGoodbye, setShowGoodbye] = useState(false) // Add this line
   
-  // Add timing configuration
+  // Add theme initialized ref
+  const themeInitialized = useRef(false)
+
+  // Update timing configuration
   const WAIT_TIMES = {
     0: 3000, // 3 seconds for first step
-    1: 5000, // 5 seconds for second step
-    2: 8000  // 8 seconds for final step
+    1: 8000  // 8 seconds for final step
   }
 
-  // Add modal confirmation steps
+  // Update modal confirmation steps
   const deleteConfirmationSteps = [
     {
       title: "Delete Account",
-      message: "This action will permanently delete your account. Your profile, settings, and all associated data will be removed from our systems. This includes:",
+      subtitle: "Initial Confirmation",
+      message: "Are you sure you want to begin the account deletion process?",
       details: [
-        "Your profile information and preferences",
-        "All saved settings and customizations",
-        "Your authentication data and login access",
-        "Any linked services or connections"
+        {
+          icon: faUser,
+          text: "Your profile information and preferences will be erased",
+          color: "text-blue-500"
+        },
+        {
+          icon: faPenFancy,
+          text: "All your saved settings and customizations will be removed",
+          color: "text-purple-500"
+        },
+        {
+          icon: faDroplet,
+          text: "Your authentication data and login access will be deleted",
+          color: "text-emerald-500"
+        },
+        {
+          icon: faPalette,
+          text: "Any linked services or connections will be disconnected",
+          color: "text-amber-500"
+        }
       ],
-      buttonText: "Continue"
+      buttonText: "Begin Deletion Process"
     },
     {
       title: "Final Warning",
-      message: "You are about to permanently delete your account. Please understand that:",
+      subtitle: "Point of No Return",
+      message: "This action is permanent and irreversible",
       details: [
-        "This action is immediate and cannot be undone",
-        "All your data will be permanently erased, including your pages",
-        "You'll lose access to all saved settings and preferences",
-        "You'll need to create a new account to use our services again"
+        {
+          icon: faTriangleExclamation,
+          text: "All your data will be permanently and immediately erased",
+          color: "text-red-500"
+        },
+        {
+          icon: faTriangleExclamation,
+          text: "You'll lose access to all your saved content and settings",
+          color: "text-red-500"
+        },
+        {
+          icon: faTriangleExclamation,
+          text: "Recovery will not be possible after this step",
+          color: "text-red-500"
+        },
+        {
+          icon: faTriangleExclamation,
+          text: "You'll need to create a new account to use our services again",
+          color: "text-red-500"
+        }
       ],
-      buttonText: "Confirm Deletion"
-    },
-    {
-      title: "Point of No Return",
-      message: "This is your last chance to keep your account. After this step:",
-      details: [
-        "Your account will be immediately deleted",
-        "All data will be permanently erased",
-        "This action cannot be reversed",
-        "Recovery will not be possible"
-      ],
-      buttonText: "Delete Forever"
+      buttonText: "Delete Account Forever"
     }
   ]
 
+  // Replace the three theme-related effects with a single optimized one
   useEffect(() => {
-    if (status === "authenticated" && session?.user?.id) {
-      setLoading(true)
-      setError(null)
-      
-      const fetchProfile = async () => {
+    if (status === "authenticated" && session?.user?.id && !themeInitialized.current) {
+      const initializeTheme = async () => {
         try {
           const res = await fetch(`/api/user/profile`, {
             headers: {
@@ -101,44 +125,38 @@ export default function ProfileSettings() {
           })
 
           const data = await res.json()
-
-          if (!res.ok) {
-            throw new Error(data.error || `Server error: ${res.status}`)
+          
+          if (res.ok) {
+            // Set theme only once during initialization
+            const isDark = data.preferences?.darkMode ?? true
+            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
+            setDarkMode(isDark)
+            
+            // Update profile with all data
+            setProfile(prev => ({
+              name: data.name || session.user.name || '',
+              bio: data.bio || '',
+              preferences: {
+                ...data.preferences,
+                darkMode: isDark,
+                colorScheme: data.preferences?.colorScheme ?? '#7C3AED'
+              }
+            }))
           }
-
-          setProfile({
-            name: data.name || session.user.name || '',
-            bio: data.bio || '',
-            preferences: {
-              notifications: data.preferences?.notifications ?? true,
-              darkMode: data.preferences?.darkMode ?? false,
-              showFollowers: data.preferences?.showFollowers ?? true,
-              showLocation: data.preferences?.showLocation ?? true,
-              showJoinDate: data.preferences?.showJoinDate ?? true,
-              showBio: data.preferences?.showBio ?? true,
-              colorScheme: data.preferences?.colorScheme ?? '#7C3AED'
-            }
-          })
         } catch (err) {
-          console.error('Error fetching profile:', err)
-          setError(err.message || 'Failed to load profile. Please try again later.')
+          console.error('Error fetching theme preference:', err)
+          // Fallback to dark theme
+          document.documentElement.setAttribute('data-theme', 'dark')
+          setDarkMode(true)
         } finally {
+          themeInitialized.current = true
           setLoading(false)
         }
       }
 
-      fetchProfile()
-    } else if (status === "unauthenticated") {
-      router.push('/auth/signin')
+      initializeTheme()
     }
-  }, [session, status, router])
-
-  useEffect(() => {
-    if (!loading) {
-      const isDark = profile.preferences.darkMode
-      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
-    }
-  }, [profile.preferences.darkMode, loading])
+  }, [session, status, setDarkMode])
 
   useEffect(() => {
     if (showDeleteModal && !canProceed) {
@@ -197,12 +215,14 @@ export default function ProfileSettings() {
     }
   }
 
+  // Modify theme change handler to be more direct
   const handleThemeChange = (isDark) => {
-    setProfile({
-      ...profile,
-      preferences: { ...profile.preferences, darkMode: isDark }
-    })
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
     setDarkMode(isDark)
+    setProfile(prev => ({
+      ...prev,
+      preferences: { ...prev.preferences, darkMode: isDark }
+    }))
   }
 
   const resetModal = () => {
@@ -215,7 +235,7 @@ export default function ProfileSettings() {
   const handleDeleteAccount = async () => {
     if (!canProceed) return
 
-    if (deleteStep < 2) {
+    if (deleteStep < 1) {
       setDeleteStep(prev => prev + 1)
       setCanProceed(false)
       setButtonProgress(0)
@@ -223,6 +243,11 @@ export default function ProfileSettings() {
     }
 
     setDeleteLoading(true)
+    setShowGoodbye(true) // Add this line
+
+    // Add a delay to show the goodbye animation
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
     try {
       const res = await fetch('/api/user/delete', {
         method: 'DELETE',
@@ -246,6 +271,7 @@ export default function ProfileSettings() {
       }
     } catch (error) {
       console.error('Delete account error:', error)
+      setShowGoodbye(false) // Add this line
       setShowDeleteModal(false)
       setDeleteStep(0)
       alert('Failed to delete account. Please try again.')
@@ -264,7 +290,7 @@ export default function ProfileSettings() {
   const handleDeleteNext = () => {
     if (!canProceed) return;
     
-    if (deleteStep < 2) {
+    if (deleteStep < 1) {
       setDeleteStep(prev => prev + 1);
       setCanProceed(false);
       setButtonProgress(0);
@@ -345,6 +371,78 @@ export default function ProfileSettings() {
   return (
     <>
       <AnimatePresence>
+        {showGoodbye && (
+          <>
+            <motion.div
+              initial={{ opacity: 0, y: '-100%' }}
+              animate={{ 
+                opacity: 1, 
+                y: 0,
+                transition: {
+                  duration: 0.5,
+                  ease: [0.33, 1, 0.68, 1], // Custom easing for garage door effect
+                  bounce: 0.2
+                }
+              }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[60] bg-gradient-to-b from-black via-black/95 to-black/90 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ 
+                opacity: 1, 
+                y: 0,
+                transition: {
+                  delay: 0.3,
+                  duration: 0.6,
+                  ease: "easeOut"
+                }
+              }}
+              className="fixed inset-0 z-[61] flex items-center justify-center"
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, rotate: -8 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1,
+                  rotate: 8,
+                  transition: {
+                    delay: 0.5,
+                    duration: 0.8,
+                    type: "spring",
+                    bounce: 0.4
+                  }
+                }}
+                className="relative"
+              >
+                <span 
+                  className="text-white/90 text-6xl md:text-8xl select-none"
+                  style={{
+                    fontFamily: "'Playfair Display', serif", // More elegant font
+                    textShadow: '0 4px 8px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.4)'
+                  }}
+                >
+                  Goodbye!
+                </span>
+                <motion.span
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    transition: { delay: 0.8, duration: 0.5 }
+                  }}
+                  className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-white/60 text-lg"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
+                >
+                  See you next time 👋
+                </motion.span>
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {showDeleteModal && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -354,30 +452,53 @@ export default function ProfileSettings() {
             onClick={handleModalClose}
           >
             <motion.div 
-              className="relative w-full max-w-2xl mx-auto bg-background border-2 rounded-xl shadow-xl overflow-hidden"
+              className="relative w-full max-w-2xl mx-auto bg-background/95 backdrop-blur-xl border-2 rounded-xl shadow-2xl overflow-hidden"
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={e => e.stopPropagation()}
             >
-              <div className="p-8 space-y-6">
-                <h2 className="text-2xl font-bold text-destructive flex items-center gap-2">
-                  <FontAwesomeIcon icon={faTriangleExclamation} className="w-6 h-6" />
-                  {deleteConfirmationSteps[deleteStep].title}
-                </h2>
-                <div className="space-y-6">
-                  <p className="text-base text-foreground/90">
+              <div className="absolute inset-0 bg-gradient-to-br from-destructive/10 via-transparent to-primary/5" />
+              <div className="relative p-8 space-y-6">
+                <div className="space-y-2">
+                  <motion.div 
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="h-8 w-1 bg-destructive rounded-full" />
+                    <h3 className="text-sm font-medium text-destructive">
+                      {deleteConfirmationSteps[deleteStep].subtitle}
+                    </h3>
+                  </motion.div>
+                  <h2 className="text-3xl font-bold text-destructive flex items-center gap-3">
+                    <FontAwesomeIcon icon={faTriangleExclamation} className="w-8 h-8" />
+                    {deleteConfirmationSteps[deleteStep].title}
+                  </h2>
+                  <p className="text-lg text-foreground/80">
                     {deleteConfirmationSteps[deleteStep].message}
                   </p>
-                  <ul className="space-y-3">
-                    {deleteConfirmationSteps[deleteStep].details.map((detail, index) => (
-                      <li key={index} className="text-base text-foreground/80 flex items-start gap-3">
-                        <span className="text-destructive text-lg">•</span>
-                        {detail}
-                      </li>
-                    ))}
-                  </ul>
                 </div>
+
+                <div className="grid grid-cols-2 gap-4 py-4">
+                  {deleteConfirmationSteps[deleteStep].details.map((detail, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="relative p-4 rounded-lg bg-background/50 border border-border/50 backdrop-blur-sm"
+                    >
+                      <div className={`absolute -top-3 -left-3 w-8 h-8 rounded-full flex items-center justify-center ${detail.color} bg-background border-2 border-current`}>
+                        <FontAwesomeIcon icon={detail.icon} className="w-4 h-4" />
+                      </div>
+                      <p className="text-sm text-foreground/80 mt-2">
+                        {detail.text}
+                      </p>
+                    </motion.div>
+                  ))}
+                </div>
+
                 <div className="flex justify-end gap-4 pt-6">
                   {!deleteLoading && (
                     <motion.button
@@ -697,13 +818,13 @@ export default function ProfileSettings() {
               </div>
               <div className="p-6 pt-0">
                 <button
-                  type="button"
-                  onClick={() => setShowDeleteModal(true)}
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:border-destructive/90 h-10 px-4 py-2 w-full"
-                >
-                  <FontAwesomeIcon icon={faTriangleExclamation} className="w-4 h-4 mr-2" />
-                  Delete Account
-                </button>
+                    type="button"
+                    onClick={() => setShowDeleteModal(true)}
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:border-destructive/90 h-10 px-4 py-2 w-full"
+                  >
+                    <FontAwesomeIcon icon={faTriangleExclamation} className="w-4 h-4 mr-2" />
+                    Delete Account
+                  </button>
               </div>
             </motion.div>
 
@@ -717,6 +838,7 @@ export default function ProfileSettings() {
               <FontAwesomeIcon icon={faSave} />
               Save Changes
             </motion.button>
+            
           </form>
         </motion.div>
       </div>
