@@ -17,76 +17,74 @@ export default function ParallaxHeader() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Adjusted parallax effects for responsive design
-    const getMobileOffset = (index) => {
-        const offsets = {
-            0: 300,
-            1: 250,
-            2: 200,
-            3: 150,
-            4: 100,
-            5: 50,
-            6: 25,
-            7: 0
-        };
-        return offsets[index] || 0;
-    };
+    function computeParallax(index, isMobile, scrollY, windowHeight) {
+        const mobileOffsets = { 6: 150, 5: 125, 4: 100, 3: 75, 2: 50, 1: 25, 0: 10 };
+        const offset = isMobile
+            ? mobileOffsets[index] || 0
+            : (6 - index) * 50;
+        const y = useTransform(scrollY, [0, windowHeight], [0, offset]);
+        const baseScale = isMobile ? 0.8 : 1;
+        const scale = baseScale + (index * 0.01);
+        return { y, scale };
+    }
 
-    const getParallaxY = (index) => {
-        const offset = isMobile ? getMobileOffset(index) : index * 100;
-        return useTransform(scrollY, [0, windowHeight], [0, offset]);
-    };
+    // Remove getLayerWidth function as it's no longer needed
 
-    // Scale transforms adjusted for mobile
-    const getScale = (index) => {
-        const baseScale = Math.min(1, window.innerWidth / 1920);
-        return (1 + (7 - index) * (isMobile ? 0.03 : 0.05)) * baseScale;
-    };
-
-    const getLayerStyle = (layer, index) => {
+    function getLayerStyle() {
         return {
             position: 'absolute',
-            y: layer.y,
-            scale: getScale(index),
-            top: 0,
-            left: 0,
-            right: 0,
-            margin: '0 auto',
+            inset: 0,
+            margin: 'auto',
+            display: 'grid',
+            placeItems: 'center',
             width: '100%',
             height: '100%',
+            willChange: 'transform',
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            perspective: 10000,
+            WebkitPerspective: 10000,
+            // Note: remove direct transform here
         };
-    };
+    }
 
-    // Layers array (removed title layer)
+    // Cache layer calculations
     const layers = [
-        { src: '/layer6.png', y: getParallaxY(6) },
-        { src: '/layer5.png', y: getParallaxY(5) },
-        { src: '/layer4.png', y: getParallaxY(4) },
-        { src: '/layer3.png', y: getParallaxY(3) },
-        { src: '/layer2.png', y: getParallaxY(2) },
-        { src: '/layer1.png', y: getParallaxY(1) },
-        { src: '/layer0.png', y: getParallaxY(0) },
+        { src: '/layer6.png', ...computeParallax(6, isMobile, scrollY, windowHeight) },
+        { src: '/layer5.png', ...computeParallax(5, isMobile, scrollY, windowHeight) },
+        { src: '/layer4.png', ...computeParallax(4, isMobile, scrollY, windowHeight) },
+        { src: '/layer3.png', ...computeParallax(3, isMobile, scrollY, windowHeight) },
+        { src: '/layer2.png', ...computeParallax(2, isMobile, scrollY, windowHeight) },
+        { src: '/layer1.png', ...computeParallax(1, isMobile, scrollY, windowHeight) },
+        { src: '/layer0.png', ...computeParallax(0, isMobile, scrollY, windowHeight) },
     ];
 
     return (
-        <div className="relative w-full h-[60vh] sm:h-[80vh] md:h-screen overflow-hidden">
-            <div className="absolute inset-0 max-w-[1920px] mx-auto">
+        <div className="relative w-screen h-screen overflow-hidden">
+            <div className="absolute inset-0 grid place-items-center">
                 {layers.map((layer, index) => (
                     <motion.div
                         key={index}
-                        style={getLayerStyle(layer, index)}
-                        className="will-change-transform"
+                        style={{
+                            y: layer.y,
+                            scale: layer.scale * 1.05, // slightly enlarged
+                            ...getLayerStyle()
+                        }}
+                        initial={false}
+                        loading="eager"
                     >
                         <img
                             src={layer.src}
                             alt={`Parallax Layer ${index}`}
-                            className="w-full h-full object-contain mx-auto"
+                            className="w-auto h-auto max-h-full"
+                            loading={index < 3 ? "eager" : "lazy"}
                             style={{
                                 imageRendering: 'pixelated',
-                                objectPosition: 'center top',
-                                backfaceVisibility: 'hidden',
-                                WebkitFontSmoothing: 'none',
-                                mozOsxFontSmoothing: 'none',
+                                width: 'clamp(0px, 100%, 100%)',
+                                objectFit: 'contain',
+                                margin: 'auto',
+                                willChange: 'transform',
+                                transform: 'translateZ(0)',
                             }}
                         />
                     </motion.div>

@@ -75,7 +75,7 @@ export default function Home() {
     <>
       <motion.div style={{ scaleX }} className="progress-bar" />
       <div className="grid-background" />
-      <div className="relative min-h-screen">
+      <div className="relative w-full h-full">
         <Head>
           <title>Messiahverse - Nikosona Wiki</title>
           <meta name="description" content="Explore the multiverse of Niko variants" />
@@ -84,7 +84,7 @@ export default function Home() {
         <UserMenu />
         <ParallaxHeader />
 
-        <div className="container mx-auto px-4 -mt-[45vh] xs:-mt-[40vh] sm:-mt-[35vh] md:-mt-[30vh] lg:-mt-48 relative z-10">
+        <div className="container mx-auto px-4 relative z-10">
           {/* Mobile Navigation - Adjusted position */}
           <motion.nav 
             className="lg:hidden fixed top-[5.5rem] left-0 right-0 z-50 mx-4 bg-surface/95 
